@@ -1,0 +1,51 @@
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.env
+**/.env
+
+# SQLite database files (legacy - not used in current implementation)
+*.db
+*.db-shm
+*.db-wal
+
+# Backup and archive folders
+*-archive/
+backup-*/
+**/backup-*/
+
+# Production/development environment files
+prd.env
+dev.env
+
+# Training and documentation archives
+training-material/
+docs-archive/
+
+# AI-generated summary files
+*_SUMMARY.md
+*_REPORT.md
+*_CHECKLIST.md
+*_STATUS.md
+*_RECOMMENDATIONS.md
+*_SUGGESTIONS.md
+WORK_WITHOUT_*.md
