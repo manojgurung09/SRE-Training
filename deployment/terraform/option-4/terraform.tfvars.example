@@ -1,0 +1,100 @@
+########################################
+# REQUIRED VARIABLES
+########################################
+
+compartment_id = "ocid1.compartment.oc1..aaaaaaa..."
+tenancy_ocid   = "ocid1.tenancy.oc1..aaaaaaaaqh5uemzgiwvqvikjxlxl6h5mdncebvlmbb7prcrcgglnbdsr5dqa"
+
+image_id       = "ocid1.image.oc1.ap-mumbai-1.aaaaaaa..."
+ssh_public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQ..."
+
+########################################
+# GENERAL SETTINGS
+########################################
+
+region       = "ap-mumbai-1"
+project_name = "bharatmart"
+environment  = "dev"
+
+########################################
+# NETWORK CONFIG
+########################################
+
+vcn_cidr            = "10.0.0.0/16"
+public_subnet_cidr  = "10.0.1.0/24"
+private_subnet_cidr = "10.0.2.0/24"
+
+enable_nat_gateway       = true
+enable_backend_public_ip = false
+
+########################################
+# FRONTEND VM SETTINGS
+########################################
+
+frontend_instance_count = 1
+frontend_instance_shape = "VM.Standard.A1.Flex"
+
+########################################
+# BACKEND VM SETTINGS
+########################################
+
+compute_instance_count        = 1
+compute_instance_shape        = "VM.Standard.A1.Flex"
+compute_instance_ocpus        = 2
+compute_instance_memory_in_gb = 12
+
+########################################
+# INSTANCE POOL & AUTO SCALING (Day 4 Lab 6)
+########################################
+
+enable_instance_pool                  = true
+instance_pool_size                    = 2
+instance_pool_min_size                = 2
+instance_pool_max_size                = 10
+enable_auto_scaling                   = true
+auto_scaling_scale_out_threshold      = 70
+auto_scaling_scale_in_threshold       = 30
+auto_scaling_scale_out_duration_minutes = 5
+auto_scaling_scale_in_duration_minutes  = 15
+
+########################################
+# LOAD BALANCER SETTINGS
+########################################
+
+load_balancer_shape          = "flexible"
+load_balancer_shape_min_mbps = 10
+load_balancer_shape_max_mbps = 10
+
+########################################
+# OBSERVABILITY & MONITORING
+########################################
+# Note: Observability features are automatically enabled
+# No additional variables required - uses existing variables:
+# - compartment_ocid (for log groups and alarms)
+# - project_name (for resource naming)
+# - backend_pool_min_size / backend_pool_max_size (for instance pool alarms)
+#
+# Features enabled:
+# - VCN Flow Logs (network traffic monitoring)
+# - Load Balancer Access & Error Logs
+# - Frontend NGINX Access & Error Logs
+# - Backend Application Logs (api.log)
+# - Custom Prometheus Metrics Collection (backend only)
+# - 12 Monitoring Alarms (CPU, Memory, Disk, LB health, etc.)
+# - OCI Notification Topic for alarm alerts
+#
+# To receive alarm notifications:
+# 1. Go to OCI Console > Notifications > Topics
+# 2. Find topic: "{project_name}-alarm-topic"
+# 3. Subscribe with email, PagerDuty, Slack, etc.
+
+########################################
+# TAGS
+########################################
+
+tags = {
+  Project     = "BharatMart"
+  ManagedBy   = "Terraform"
+  Environment = "dev"
+  Team        = "SRE"
+}
