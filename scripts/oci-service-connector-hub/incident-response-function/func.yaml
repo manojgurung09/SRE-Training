@@ -1,0 +1,8 @@
+schema_version: 20180708
+name: incident-response-handler
+version: 0.0.1
+runtime: python
+entrypoint: /python/bin/fdk /function/func.py handler
+memory: 256
+timeout: 30
+
