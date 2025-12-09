@@ -1,0 +1,225 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bharatmart-worker-email
+  namespace: bharatmart
+  labels:
+    app: bharatmart
+    tier: workers
+    component: email
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: bharatmart
+      tier: workers
+      component: email
+  template:
+    metadata:
+      labels:
+        app: bharatmart
+        tier: workers
+        component: email
+    spec:
+      containers:
+      - name: email-worker
+        image: <YOUR_REGISTRY>/bharatmart-workers:latest
+        imagePullPolicy: Always
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: WORKER_TYPE
+          value: "email"
+        - name: WORKER_CONCURRENCY
+          value: "3"
+        - name: SUPABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: bharatmart-secrets
+              key: supabase_url
+        - name: SUPABASE_SERVICE_ROLE_KEY
+          valueFrom:
+            secretKeyRef:
+              name: bharatmart-secrets
+              key: supabase_service_role_key
+        - name: QUEUE_REDIS_URL
+          valueFrom:
+            configMapKeyRef:
+              name: bharatmart-config
+              key: queue_redis_url
+        - name: SMTP_HOST
+          valueFrom:
+            secretKeyRef:
+              name: bharatmart-secrets
+              key: smtp_host
+        - name: SMTP_USER
+          valueFrom:
+            secretKeyRef:
+              name: bharatmart-secrets
+              key: smtp_user
+        - name: SMTP_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: bharatmart-secrets
+              key: smtp_password
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bharatmart-worker-order
+  namespace: bharatmart
+  labels:
+    app: bharatmart
+    tier: workers
+    component: order
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: bharatmart
+      tier: workers
+      component: order
+  template:
+    metadata:
+      labels:
+        app: bharatmart
+        tier: workers
+        component: order
+    spec:
+      containers:
+      - name: order-worker
+        image: <YOUR_REGISTRY>/bharatmart-workers:latest
+        imagePullPolicy: Always
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: WORKER_TYPE
+          value: "order"
+        - name: WORKER_CONCURRENCY
+          value: "5"
+        - name: SUPABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: bharatmart-secrets
+              key: supabase_url
+        - name: SUPABASE_SERVICE_ROLE_KEY
+          valueFrom:
+            secretKeyRef:
+              name: bharatmart-secrets
+              key: supabase_service_role_key
+        - name: QUEUE_REDIS_URL
+          valueFrom:
+            configMapKeyRef:
+              name: bharatmart-config
+              key: queue_redis_url
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bharatmart-worker-payment
+  namespace: bharatmart
+  labels:
+    app: bharatmart
+    tier: workers
+    component: payment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: bharatmart
+      tier: workers
+      component: payment
+  template:
+    metadata:
+      labels:
+        app: bharatmart
+        tier: workers
+        component: payment
+    spec:
+      containers:
+      - name: payment-worker
+        image: <YOUR_REGISTRY>/bharatmart-workers:latest
+        imagePullPolicy: Always
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: WORKER_TYPE
+          value: "payment"
+        - name: WORKER_CONCURRENCY
+          value: "3"
+        - name: SUPABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: bharatmart-secrets
+              key: supabase_url
+        - name: SUPABASE_SERVICE_ROLE_KEY
+          valueFrom:
+            secretKeyRef:
+              name: bharatmart-secrets
+              key: supabase_service_role_key
+        - name: QUEUE_REDIS_URL
+          valueFrom:
+            configMapKeyRef:
+              name: bharatmart-config
+              key: queue_redis_url
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+---
+# HPA for Order Workers (scales based on queue depth)
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: bharatmart-worker-order-hpa
+  namespace: bharatmart
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: bharatmart-worker-order
+  minReplicas: 2
+  maxReplicas: 20
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 75
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Pods
+        value: 1
+        periodSeconds: 60
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+      - type: Pods
+        value: 2
+        periodSeconds: 30

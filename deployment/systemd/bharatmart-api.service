@@ -1,0 +1,30 @@
+# Systemd service file for Backend API
+# Copy to /etc/systemd/system/bharatmart-api.service
+
+[Unit]
+Description=BharatMart Backend API Service
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/opt/bharatmart-api
+Environment=NODE_ENV=production
+EnvironmentFile=/opt/bharatmart-api/.env
+ExecStart=/usr/bin/node dist/server/index.js
+Restart=always
+RestartSec=10
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=bharatmart-api
+
+# Resource limits
+LimitNOFILE=65536
+LimitNPROC=4096
+
+# Security
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

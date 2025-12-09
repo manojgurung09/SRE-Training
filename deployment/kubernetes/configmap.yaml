@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: bharatmart-config
+  namespace: bharatmart
+data:
+  # Layer 1: Frontend URL
+  frontend_url: "https://yourdomain.com"
+
+  # Layer 4: Cache Redis Connection
+  cache_redis_url: "redis://bharatmart-redis-cache:6379"
+  cache_redis_db: "0"
+  cache_ttl: "3600"
+
+  # Layer 5: Queue Redis Connection
+  queue_redis_url: "redis://bharatmart-redis-queue:6379"
+  queue_redis_db: "1"
+
+  # Layer 6: Monitoring
+  metrics_port: "9090"
+  prometheus_enabled: "true"
+
+  # Logging
+  log_level: "info"
+  log_format: "json"
+
+  # Scaling Configuration
+  worker_concurrency: "5"
+  max_concurrent_jobs: "5"

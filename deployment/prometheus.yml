@@ -1,0 +1,57 @@
+# Prometheus Configuration for Multi-Tier Monitoring
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'bharatmart-production'
+    region: 'oci-mumbai'
+
+# Alert manager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []
+
+# Scrape configurations
+scrape_configs:
+  # Backend API metrics
+  - job_name: 'backend-api'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['backend:3000']
+        labels:
+          tier: 'api-gateway'
+          service: 'express-api'
+
+  # Redis cache metrics (using redis_exporter)
+  - job_name: 'redis-cache'
+    static_configs:
+      - targets: ['cache:6379']
+        labels:
+          tier: 'cache'
+          service: 'redis'
+
+  # Queue metrics
+  - job_name: 'redis-queue'
+    static_configs:
+      - targets: ['queue:6379']
+        labels:
+          tier: 'queue'
+          service: 'redis'
+
+  # Worker metrics (if workers expose metrics)
+  - job_name: 'workers'
+    static_configs:
+      - targets: ['worker-email:9090', 'worker-orders:9090']
+        labels:
+          tier: 'workers'
+          service: 'background-jobs'
+
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+        labels:
+          tier: 'monitoring'
+          service: 'prometheus'

@@ -1,0 +1,32 @@
+# Systemd service file for Queue Workers
+# Copy to /etc/systemd/system/bharatmart-worker@.service
+# Start instances: systemctl start bharatmart-worker@email bharatmart-worker@orders
+
+[Unit]
+Description=BharatMart Worker Service (%i)
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/opt/bharatmart-workers
+Environment=NODE_ENV=production
+Environment=WORKER_NAME=%i
+EnvironmentFile=/opt/bharatmart-workers/.env
+ExecStart=/usr/bin/node dist/server/workers/%i.js
+Restart=always
+RestartSec=10
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=bharatmart-worker-%i
+
+# Resource limits
+LimitNOFILE=65536
+LimitNPROC=4096
+
+# Security
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
